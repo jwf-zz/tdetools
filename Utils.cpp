@@ -17,7 +17,7 @@
 
 using namespace std;
 
-void get_embedding(Settings* settings, double* &data, ulong &length) {
+void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
     ulong i;
     uint j,k;
     uint alldim, maxemb, emb, rundel, delsum;
@@ -54,7 +54,7 @@ void get_embedding(Settings* settings, double* &data, ulong &length) {
     }
     cerr << "Length: " << settings->length << endl << "Embed Dim: " << settings->embdim << endl;
 
-    check_alloc(data = (double*)calloc((settings->length-maxemb)*settings->embdim,sizeof(double)));
+    check_alloc(data = (ANNcoord*)calloc((settings->length-maxemb)*settings->embdim,sizeof(ANNcoord)));
     uint step = settings->embdim;
     for (i=maxemb;i<settings->length;i++) {
         rundel=0;
@@ -67,7 +67,7 @@ void get_embedding(Settings* settings, double* &data, ulong &length) {
     length = settings->length - maxemb;
 }
 
-void get_ann_points(ANNpointArray &dataPts, double* series, unsigned long  rows, unsigned long  cols)
+void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long  rows, unsigned long  cols)
 {
 	ulong k = 0;
     dataPts = annAllocPts(rows, cols);
@@ -81,9 +81,9 @@ void get_ann_points(ANNpointArray &dataPts, double* series, unsigned long  rows,
 void print_matrix(CvMat* matrix) {
 	int i,j;
 	for (i = 0; i < matrix->rows; i++) {
-		cout << CV_MAT_ELEM(*matrix, double, i, 0);
+		cout << CV_MAT_ELEM(*matrix, ANNcoord, i, 0);
 		for (j = 1; j < matrix->cols; j++) {
-			cout << " " << CV_MAT_ELEM(*matrix, double, i, j);
+			cout << " " << CV_MAT_ELEM(*matrix, ANNcoord, i, j);
 		}
 		cout << endl;
 	}

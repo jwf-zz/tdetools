@@ -37,8 +37,12 @@ typedef struct {
 	char stdo;
 } Settings;
 
-void get_embedding(Settings* settings, double*& data, ulong &length);
-void get_ann_points(ANNpointArray &dataPts, double* series, ulong rows, ulong cols);
+void get_embedding(Settings* settings, ANNcoord*& data, ulong &length);
+void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, ulong rows, ulong cols);
 void print_matrix(CvMat* matrix);
+
+#define MAT_TYPE CV_32FC1
+#define FLOAT_SCAN "%G"
+#define FLOAT_OUT "%.8G"
 
 #endif /* UTILS_H_ */

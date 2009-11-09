@@ -1,4 +1,4 @@
-CXXFLAGS =	-O3 -ggdb -Wall -march=native -ftree-vectorize -I${HOME}/include `pkg-config --cflags opencv`
+CXXFLAGS = -ggdb -Wall -I${HOME}/include `pkg-config --cflags opencv`
 LIBS = -L${HOME}/lib -lANN -lddtsa `pkg-config --libs opencv`
 TARGETS = $(buildtree_TARGET) $(classifytrajectory_TARGET)
 OBJS = $(buildtree_OBJS) $(classifytrajectory_OBJS)

@@ -22,6 +22,7 @@
 #include <fstream>
 #include <ANN/ANN.h>
 #include <Tisean/tsa.h>
+#include <limits.h>
 
 #include "Utils.h"
 #include "BuildTree.h"

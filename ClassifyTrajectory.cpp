@@ -71,15 +71,13 @@ int main (int argc, char *argv[]) {
 	NamedModel *model;
 	Classifier *classifier;
     Settings settings = { ULONG_MAX, 0, 0xff, 1, 1, 2, NULL, NULL, NULL, 0, 0, 0, 1 };
-    double** data; // one double* for each model.
-    double *proj;
-    ulong *tlengths, tlength;
+    ANNcoord* data;
+    ulong tlength;
     char stin=0;
     char *model_ini = (char*)"models.ini";
     ifstream models_file;
     char buf[50];
     int n = 50;
-    uint i;
 
     if (scan_help(argc,argv))
         show_options(argv[0]);
@@ -119,46 +117,30 @@ int main (int argc, char *argv[]) {
     		models.push_back(model);
     	}
     }
-    data = new double*[models.size()];
-    tlengths = new ulong[models.size()];
-    for (i = 0; i < models.size(); i++) {
-        settings.embset = 1;
-        settings.embdim = models[i]->model->getEmbDim();
-        settings.delayset = 1;
-        settings.delay = models[i]->model->getDelay();
-
-        get_embedding(&settings, data[i], tlengths[i]);
-
-        settings.pcaembset = models[i]->model->getUsePCA();
-        if (settings.pcaembset) {
-        	settings.pcaembdim = models[i]->model->getPCAEmbDim();
-        	proj = models[i]->model->projectData(data[i],tlengths[i],settings.embdim);
-        	delete [] data[i];
-        	data[i] = proj;
-        }
-        else {
-        	settings.pcaembdim = settings.embdim;
-        }
+    // Get delay embedding settings from one of the models
+    settings.embset = 1;
+    settings.embdim = models[0]->model->getEmbDim();
+    settings.delayset = 1;
+    settings.delay = models[0]->model->getDelay();
+    settings.pcaembset = models[0]->model->getUsePCA();
+    if (settings.pcaembset) {
+    	settings.pcaembdim = models[0]->model->getPCAEmbDim();
     }
-    // Since the projected data might have different lengths under different models,
-    // we just use the minimum so that all points are compared under all models.
-    tlength = tlengths[0];
-    for (i = 1; i < models.size(); i++) {
-    	if (tlengths[i] < tlength) tlength = tlengths[i];
+    else {
+    	settings.pcaembdim = settings.embdim;
     }
+
+    get_embedding(&settings, data, tlength);
 
     classifier = new Classifier(models);
-    classifier->go(data, tlength);
+    classifier->go(data, tlength, settings.embdim);
 
-    for (i = 0; i < models.size(); i++) {
+    for (uint i = 0; i < models.size(); i++) {
     	free(models[i]->name);
     	delete models[i]->model;
     	free(models[i]);
-    	delete [] data[i];
     }
     delete [] data;
-    delete [] tlengths;
-
     annClose();
     if (settings.column != NULL) free(settings.column);
     if (settings.infile != NULL) free(settings.infile);

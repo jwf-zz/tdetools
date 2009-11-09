@@ -19,13 +19,13 @@
 #include "BuildTree.h"
 #include "TDEModel.h"
 
-#define NEIGHBOURS 4
+#define NEIGHBOURS 8
 
 using namespace std;
 using namespace boost;
 
 TDEModel::TDEModel(Settings* settings) {
-    double *data, *projecteddata;
+    ANNcoord *data, *projecteddata;
 
     length = settings->length;
     embdim = settings->embdim;
@@ -61,10 +61,11 @@ TDEModel::TDEModel(ifstream* model_file) {
 	*model_file >> delay;
 	*model_file >> embdim;
 	*model_file >> avgsize;
+	cerr << "Model params: " << delay << " " << " " << embdim << " " << avgsize << endl;
 	if (avgsize > 0) {
 		use_pca = 1;
-		avg = cvCreateMat(1,avgsize,CV_64FC1);
-		double* ptr = (double*)avg->data.ptr;
+		avg = cvCreateMat(1,avgsize,MAT_TYPE);
+		ANNcoord* ptr = (ANNcoord*)avg->data.ptr;
 		for (i = 0; i < avgsize; i++) {
 			*model_file >> *ptr++;
 		}
@@ -75,8 +76,8 @@ TDEModel::TDEModel(ifstream* model_file) {
 	*model_file >> basesrows >> basescols;
 	if (basesrows > 0 && basescols > 0) {
 		use_pca = 1;
-		bases = cvCreateMat(basesrows,basescols,CV_64FC1);
-		double* ptr = (double*)bases->data.ptr;
+		bases = cvCreateMat(basesrows,basescols,MAT_TYPE);
+		ANNcoord* ptr = (ANNcoord*)bases->data.ptr;
 		for (i = 0; i < basesrows; i++) {
 			for (j = 0; j < basescols; j++) {
 				*model_file >> *ptr++;
@@ -87,6 +88,8 @@ TDEModel::TDEModel(ifstream* model_file) {
 	kdTree = new ANNkd_tree(*model_file);
 	dataPts = kdTree->thePoints();
 	length = kdTree->nPoints();
+
+	cerr << "Loaded " << length << " points." << endl;
 }
 
 TDEModel::~TDEModel() {
@@ -106,7 +109,7 @@ void TDEModel::DumpTree(char* outfile) {
     else {
     	fout << avg->cols << endl;
     	for (int i = 0; i < avg->cols; i++) {
-    		fout << " " << CV_MAT_ELEM(*avg, double, 0, i);
+    		fout << " " << CV_MAT_ELEM(*avg, ANNcoord, 0, i);
     	}
     }
 	fout << endl;
@@ -116,9 +119,9 @@ void TDEModel::DumpTree(char* outfile) {
     else {
     	fout << bases->rows << " " << bases->cols << endl;
     	for (int i = 0; i < bases->rows; i++) {
-        	fout << CV_MAT_ELEM(*bases, double, i, 0);
+        	fout << CV_MAT_ELEM(*bases, ANNcoord, i, 0);
     		for (int j = 1; j < bases->cols; j++) {
-    			fout << " " << CV_MAT_ELEM(*bases, double, i, j);
+    			fout << " " << CV_MAT_ELEM(*bases, ANNcoord, i, j);
     		}
     		fout << endl;
     	}
@@ -157,7 +160,7 @@ void TDEModel::simulateTrajectory(ANNpoint s0, ANNpointArray trajectory, uint di
     			else if (nn_idx[k] == (int)length-1) nn_idx[k] = nn_idx[NEIGHBOURS];
     			trajectory[i][j] += dataPts[nn_idx[k]+1][j];
     		}
-    		trajectory[i][j] = trajectory[i][j] / (double)k + generator();
+    		trajectory[i][j] = trajectory[i][j] / (ANNcoord)k + generator();
     	}
     }
 }
@@ -166,32 +169,32 @@ ANNpoint TDEModel::getDataPoint(uint idx) {
 	return dataPts[idx];
 }
 
-void TDEModel::computePCABases(double *data, uint rows, uint cols, uint numbases) {
+void TDEModel::computePCABases(ANNcoord *data, uint rows, uint cols, uint numbases) {
 	CvMat **embedding, *cov, *eigenvectors, *eigenvalues, *vector;
-	double *basesdata;
+	ANNcoord *basesdata;
 	uint i, j, offset;
 
-	cov = cvCreateMat(cols, cols, CV_64FC1);
-	eigenvectors = cvCreateMat(cols,cols,CV_64FC1);
-	eigenvalues = cvCreateMat(cols,cols,CV_64FC1);
+	cov = cvCreateMat(cols, cols, MAT_TYPE);
+	eigenvectors = cvCreateMat(cols,cols,MAT_TYPE);
+	eigenvalues = cvCreateMat(cols,cols,MAT_TYPE);
 	embedding = new CvMat*[rows];
 	for (i = 0; i < rows; i++) {
-		vector = cvCreateMatHeader(1, cols, CV_64FC1);
-		cvInitMatHeader(vector, 1, cols, CV_64FC1, data + i * cols);
+		vector = cvCreateMatHeader(1, cols, MAT_TYPE);
+		cvInitMatHeader(vector, 1, cols, MAT_TYPE, data + i * cols);
 		embedding[i] = vector;
 	}
-	avg = cvCreateMat(1,cols,CV_64FC1);
+	avg = cvCreateMat(1,cols,MAT_TYPE);
 	cvCalcCovarMatrix((const CvArr **)embedding, rows, cov, avg, CV_COVAR_NORMAL);
 	cvSVD(cov, eigenvalues, eigenvectors, 0, CV_SVD_MODIFY_A);
 
-	basesdata = new double[cols*numbases];
+	basesdata = new ANNcoord[cols*numbases];
 	for (i = 0, offset = 0; i < cols; i++) {
 		for (j = 0; j < numbases; j++) {
-			basesdata[offset++] = ((double*)eigenvectors->data.ptr)[i*cols+j];
+			basesdata[offset++] = ((ANNcoord*)eigenvectors->data.ptr)[i*cols+j];
 		}
 	}
-	bases = cvCreateMatHeader(cols, numbases, CV_64FC1);
-	cvInitMatHeader(bases, cols, numbases, CV_64FC1, basesdata);
+	bases = cvCreateMatHeader(cols, numbases, MAT_TYPE);
+	cvInitMatHeader(bases, cols, numbases, MAT_TYPE, basesdata);
 
 	for (i = 0; i < rows; i++) {
     	cvReleaseMat(&embedding[i]);
@@ -202,20 +205,20 @@ void TDEModel::computePCABases(double *data, uint rows, uint cols, uint numbases
     cvReleaseMat(&eigenvalues);
 }
 
-double* TDEModel::projectData(double* data, uint rows, uint cols) {
+ANNcoord* TDEModel::projectData(ANNcoord* data, uint rows, uint cols) {
 	if (!use_pca) return data;
-	double* shifteddata = new double[rows*cols];
-	double* projecteddata = new double[rows*bases->cols];
+	ANNcoord* shifteddata = new ANNcoord[rows*cols];
+	ANNcoord* projecteddata = new ANNcoord[rows*bases->cols];
 	uint i, j, offset;
 
 	for (i = 0, offset = 0; i < rows; i++) {
 		for (j = 0; j < cols; j++) {
-			shifteddata[offset] = data[offset] - ((double*)avg->data.ptr)[j];
+			shifteddata[offset] = data[offset] - ((ANNcoord*)avg->data.ptr)[j];
 			offset++;
 		}
 	}
-	CvMat projected = cvMat(rows, bases->cols, CV_64FC1, projecteddata);
-	CvMat dataMat = cvMat(rows, cols, CV_64FC1, shifteddata);
+	CvMat projected = cvMat(rows, bases->cols, MAT_TYPE, projecteddata);
+	CvMat dataMat = cvMat(rows, cols, MAT_TYPE, shifteddata);
 	cvGEMM(&dataMat, bases, 1.0, NULL, 0.0, &projected, 0);
 	/*
 	for (i = 0; i < (unsigned)bases->cols; i++) {
