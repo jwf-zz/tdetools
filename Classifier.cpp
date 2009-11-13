@@ -13,8 +13,8 @@
 #include "ClassifyTrajectory.h"
 #include "Classifier.h"
 
-#define MATCH_STEPS 32
-#define NEIGHBOURS 4
+#define MATCH_STEPS 60
+#define NEIGHBOURS 8
 
 using namespace std;
 
@@ -34,11 +34,11 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 	ANNcoord *projected_data;
 	ANNpointArray ap;
 	ANNidx nn_idx[NEIGHBOURS+1];
-	ANNdist dists[NEIGHBOURS+1];
+	ANNdist dists[NEIGHBOURS+1], mdist;
 	CvMat *navg[M], *navg_next[M], *proj_next[M];
-	CvMat p, *mdists, *nn[M], *nnn[M];
+	CvMat p, np, *mdists, *nn[M], *nnn[M];
 	ulong i,j,k,l,a,N,pcaembdim;
-	ANNdist dist, dist_next, *dst;
+	ANNdist dist, dist_next, *dst, l1, l2;
 	ANNcoord *p1, *p2, *p3, *p4;
 	mdists = cvCreateMat(length-MATCH_STEPS-1,models.size(),MAT_TYPE);
 	cvZero(mdists);
@@ -62,13 +62,11 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 			pcaembdim = model->getPCAEmbDim();
 			projected_data = model->projectData(data+i*embdim,MATCH_STEPS+1,embdim);
 			get_ann_points(ap, projected_data, MATCH_STEPS+1, pcaembdim);
-
+			mdist = 0.0;
 			for (j = 0; j < MATCH_STEPS; j++) {
-				p = cvMat(1,pcaembdim,MAT_TYPE, ap[j]);// &projected_data[j*pcaembdim]);
-				// cout << "Checking point: ";
-				// print_matrix(&p);
-
+				p = cvMat(1,pcaembdim,MAT_TYPE, ap[j]);
 				model->getKNN(ap[j], NEIGHBOURS+1, nn_idx, dists);
+
 				for (l = 0; l < NEIGHBOURS; l++) {
 					// Make sure none of the first NEIGHBOURS neighbours is N
 					if (nn_idx[l] == ANN_NULL_IDX) break;
@@ -84,26 +82,53 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 				}
 				if (l < NEIGHBOURS) cout << "Warning: Couldn't find enough neighbours." << endl;
 
+				// Computes the mean of the nearest neighbours.
 				cvReduce(nn[k], navg[k], 0, CV_REDUCE_AVG );
-				dist = -sqrt(annDist(pcaembdim,(ANNcoord*)p.data.ptr,(ANNcoord*)navg[k]->data.ptr));
 
+				// Computes the mean of the neigbours' successors
 				cvReduce(nnn[k], navg_next[k], 0, CV_REDUCE_AVG );
+
+				/*
+                dist = -sqrt(annDist(pcaembdim, (ANNcoord*) p.data.ptr,
+                                (ANNcoord*) navg[k]->data.ptr));
+				*/
+
 				p1 = (ANNcoord*)navg_next[k]->data.ptr;
 				p2 = (ANNcoord*)navg[k]->data.ptr;
 				dst = (ANNcoord*)proj_next[k]->data.ptr;
 				for (l = 0; l < pcaembdim; l++) {
 					*dst++ = ap[j][l] + (*p1++ - *p2++);
 				}
-				p = cvMat(1,pcaembdim,MAT_TYPE, ap[j+1]);
-				dist_next = -sqrt(annDist(pcaembdim,(ANNcoord*)p.data.ptr,(ANNcoord*)proj_next[k]->data.ptr));
-				/*
-				cout << "Expected next point: "; print_matrix(proj_next);
-				cout << "Real next point: "; print_matrix(&p);
-				cout << model_name << ". Dist1: " << dist << ", Dist2: " << dist_next <<  endl;
-				*/
-				cvmSet(mdists,i,k,cvmGet(mdists,i,k)+(dist+dist_next));
+
+                // np is the subsequent point in the trajectory to be classified.
+                np = cvMat(1, pcaembdim, MAT_TYPE, ap[j + 1]);
+
+                /*
+                dist_next = -sqrt(annDist(pcaembdim,
+                                (ANNcoord*) np.data.ptr,
+                                (ANNcoord*) proj_next[k]->data.ptr));
+                */
+                //mdist = mdist + (dist + dist_next);
+
+                // Shift each vector to the origin and compute the dot product
+                // normalized by the length of the larger vector.
+                p1 = (ANNcoord*)p.data.ptr;
+                p2 = (ANNcoord*)np.data.ptr;
+                p3 = (ANNcoord*)proj_next[k]->data.ptr;
+                dist = 0.0;
+                l1 = 0.0; // Length of first vector
+                l2 = 0.0; // Length of second vector
+                for (l = 0; l < pcaembdim; l++) {
+                        dist = dist + (*p2 - *p1)*(*p3 - *p1);
+                        l1 = l1 + (*p2 - *p1)*(*p2 - *p1);
+                        l2 = l2 + (*p3 - *p1)*(*p3 - *p1);
+                        *p1++; *p2++; *p3++;
+                }
+                //l1 = sqrt(l1);
+                //l2 = sqrt(l2);
+                mdist = mdist + dist/MAX(l1,l2);
 			}
-			//cout << model_name << ": " << cvmGet(mdists,i,k) << endl;
+			cvmSet(mdists, i, k, mdist);
 		}
 	}
 	print_matrix(mdists);
