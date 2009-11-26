@@ -1,2 +1,6 @@
 .svn
+*.o
+classifytrajectory
+buildmodel
+
 

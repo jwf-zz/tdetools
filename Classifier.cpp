@@ -13,7 +13,7 @@
 #include "ClassifyTrajectory.h"
 #include "Classifier.h"
 
-#define MATCH_STEPS 60
+#define MATCH_STEPS 50
 #define NEIGHBOURS 8
 
 using namespace std;
