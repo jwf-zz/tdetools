@@ -20,7 +20,7 @@ private:
 
 public:
 	Classifier(std::vector<NamedModel*> models);
-	void go(ANNcoord* data, ulong length, ulong embdim);
+	void go(ANNcoord* data, ulong length, ulong embdim, uint neighbours, uint seglength);
 	virtual ~Classifier();
 };
 

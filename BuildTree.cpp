@@ -92,7 +92,7 @@ void scan_options(int n,char **str, Settings *settings) {
 int main (int argc, char *argv[]) {
 	srand((unsigned)time(NULL));
 	TDEModel *tdeModel;
-    Settings settings = { ULONG_MAX, 0, 0xff, 1, 1, 2, 2, NULL, NULL, NULL, 0, 0, 0, 0, 1 };
+    Settings settings = { ULONG_MAX, 0, 0xff, 1, 4, 32, 1, 2, 2, NULL, NULL, NULL, 0, 0, 0, 0, 1 };
     char stin=0;
     uint i, j;
 

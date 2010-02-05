@@ -37,6 +37,9 @@ void show_options(char *progname) {
     fprintf(stderr,"\t-x # of rows to ignore [default: 0]\n");
     fprintf(stderr,"\t-M num. of columns to read [default: 1]\n");
     fprintf(stderr,"\t-c columns to read [default: 1,...,M]\n");
+    fprintf(stderr,"\t-n number of neighbours to match [default: 4]\n");
+    fprintf(stderr,"\t-s length of matched segments [default: 32]\n");
+
     fprintf(stderr,"\t-V verbosity level [default: 1]\n\t\t"
             "0='only panic messages'\n\t\t"
             "1='+ input/output messages'\n");
@@ -57,6 +60,12 @@ void scan_options(int n,char **str, Settings *settings) {
         sscanf(out,"%u",&settings->indim);
         settings->dimset=1;
     }
+    if ((out=check_option(str,n,'n','u')) != NULL) {
+        sscanf(out,"%u",&settings->neighbours);
+    }
+    if ((out=check_option(str,n,'c','u')) != NULL) {
+        sscanf(out,"%u",&settings->seglength);
+    }
     if ((out=check_option(str,n,'V','u')) != NULL)
         sscanf(out,"%u",&settings->verbosity);
     if ((out=check_option(str,n,'o','o')) != NULL) {
@@ -70,14 +79,14 @@ int main (int argc, char *argv[]) {
 	vector<NamedModel*> models;
 	NamedModel *model;
 	Classifier *classifier;
-    Settings settings = { ULONG_MAX, 0, 0xff, 1, 1, 2, NULL, NULL, NULL, 0, 0, 0, 1 };
+    Settings settings = { ULONG_MAX, 0, 0xff, 1, 4, 32, 1, 2, NULL, NULL, NULL, 0, 0, 0, 1 };
     ANNcoord* data;
     ulong tlength;
     char stin=0;
     char *model_ini = (char*)"models.ini";
     ifstream models_file;
-    char buf[50];
-    int n = 50;
+    char buf[500];
+    int n = 500;
 
     if (scan_help(argc,argv))
         show_options(argv[0]);
@@ -113,6 +122,7 @@ int main (int argc, char *argv[]) {
     		check_alloc(model=(NamedModel*)calloc(1,sizeof(NamedModel)));
     		check_alloc(model->name=(char*)calloc(strlen(buf)+1,sizeof(char)));
     		strcpy(model->name,buf);
+    		cerr << "Reading from model" << model->name << endl;
     		model->model = new TDEModel(new ifstream(model->name));
     		models.push_back(model);
     	}
@@ -133,7 +143,7 @@ int main (int argc, char *argv[]) {
     get_embedding(&settings, data, tlength);
 
     classifier = new Classifier(models);
-    classifier->go(data, tlength, settings.embdim);
+    classifier->go(data, tlength, settings.embdim, settings.neighbours, settings.seglength);
 
     for (uint i = 0; i < models.size(); i++) {
     	free(models[i]->name);

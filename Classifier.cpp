@@ -13,9 +13,6 @@
 #include "ClassifyTrajectory.h"
 #include "Classifier.h"
 
-#define MATCH_STEPS 50
-#define NEIGHBOURS 8
-
 using namespace std;
 
 Classifier::Classifier(vector<NamedModel*> models) {
@@ -26,21 +23,22 @@ Classifier::~Classifier() {
 	// TODO Auto-generated destructor stub
 }
 
-void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
+void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
+					uint neighbours, uint seglength) {
 	// For each set of MATCH_STEPS points, compute the likelihood under each model.
 	TDEModel* model;
 	uint M = models.size();
 	char* model_name;
 	ANNcoord *projected_data;
 	ANNpointArray ap;
-	ANNidx nn_idx[NEIGHBOURS+1];
-	ANNdist dists[NEIGHBOURS+1], mdist;
+	ANNidx nn_idx[neighbours+1];
+	ANNdist dists[neighbours+1], mdist;
 	CvMat *navg[M], *navg_next[M], *proj_next[M];
 	CvMat p, np, *mdists, *nn[M], *nnn[M];
 	ulong i,j,k,l,a,N,pcaembdim;
-	ANNdist dist, dist_next, *dst, l1, l2;
+	ANNdist dist, *dst, l1, l2; //, dist_next;
 	ANNcoord *p1, *p2, *p3, *p4;
-	mdists = cvCreateMat(length-MATCH_STEPS-1,models.size(),MAT_TYPE);
+	mdists = cvCreateMat(length-seglength-1,models.size(),MAT_TYPE);
 	cvZero(mdists);
 
 	for (i = 0; i < M; i++) {
@@ -48,11 +46,11 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 		navg[i] = cvCreateMat(1,pcaembdim,MAT_TYPE);
 		navg_next[i] = cvCreateMat(1,pcaembdim,MAT_TYPE);
 		proj_next[i] = cvCreateMat(1,pcaembdim, MAT_TYPE);
-		nn[i] = cvCreateMat(NEIGHBOURS,pcaembdim, MAT_TYPE);
-		nnn[i] = cvCreateMat(NEIGHBOURS,pcaembdim, MAT_TYPE);
+		nn[i] = cvCreateMat(neighbours,pcaembdim, MAT_TYPE);
+		nnn[i] = cvCreateMat(neighbours,pcaembdim, MAT_TYPE);
 	}
 
-	for (i = 0; i < length-MATCH_STEPS-1; i++) { //=MATCH_STEPS) {
+	for (i = 0; i < length-seglength-1; i++) { //=MATCH_STEPS) {
 		// Get the MATCH_STEPS points
 		// cout << "Step " << i << endl;
 		for (k = 0; k < M; k++) {
@@ -60,17 +58,17 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 			model_name = models[k]->name;
 			N = model->getLength();
 			pcaembdim = model->getPCAEmbDim();
-			projected_data = model->projectData(data+i*embdim,MATCH_STEPS+1,embdim);
-			get_ann_points(ap, projected_data, MATCH_STEPS+1, pcaembdim);
+			projected_data = model->projectData(data+i*embdim,seglength+1,embdim);
+			get_ann_points(ap, projected_data, seglength+1, pcaembdim);
 			mdist = 0.0;
-			for (j = 0; j < MATCH_STEPS; j++) {
+			for (j = 0; j < seglength; j++) {
 				p = cvMat(1,pcaembdim,MAT_TYPE, ap[j]);
-				model->getKNN(ap[j], NEIGHBOURS+1, nn_idx, dists);
+				model->getKNN(ap[j], neighbours+1, nn_idx, dists);
 
-				for (l = 0; l < NEIGHBOURS; l++) {
-					// Make sure none of the first NEIGHBOURS neighbours is N
+				for (l = 0; l < neighbours; l++) {
+					// Make sure none of the first neighbours is N
 					if (nn_idx[l] == ANN_NULL_IDX) break;
-					else if ((ulong)nn_idx[l] == N-1) nn_idx[l] = nn_idx[NEIGHBOURS];
+					else if ((ulong)nn_idx[l] == N-1) nn_idx[l] = nn_idx[neighbours];
 					p1 = (ANNcoord*)(nn[k]->data.ptr+l*nn[k]->step);
 					p2 = (ANNcoord*)(nnn[k]->data.ptr+l*nnn[k]->step);
 					p3 = model->getDataPoint(nn_idx[l]);
@@ -80,7 +78,7 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim) {
 						*p2++ = *p4++;
 					}
 				}
-				if (l < NEIGHBOURS) cout << "Warning: Couldn't find enough neighbours." << endl;
+				if (l < neighbours) cout << "Warning: Couldn't find enough neighbours." << endl;
 
 				// Computes the mean of the nearest neighbours.
 				cvReduce(nn[k], navg[k], 0, CV_REDUCE_AVG );

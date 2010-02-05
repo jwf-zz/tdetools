@@ -24,6 +24,8 @@ typedef struct {
 	ulong exclude;
 	uint verbosity;
 	int delay;
+	uint neighbours;
+	uint seglength;
 	uint indim;
 	uint embdim;
 	uint pcaembdim;
