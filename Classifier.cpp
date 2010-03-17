@@ -41,6 +41,9 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 	mdists = cvCreateMat(length-seglength-1,models.size(),MAT_TYPE);
 	cvZero(mdists);
 
+	cerr << "Using " << neighbours << " neighbours with segment length " << seglength << endl;
+
+
 	for (i = 0; i < M; i++) {
 		pcaembdim = models[i]->model->getPCAEmbDim();
 		navg[i] = cvCreateMat(1,pcaembdim,MAT_TYPE);

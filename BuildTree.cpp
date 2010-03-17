@@ -30,8 +30,6 @@
 
 using namespace std;
 
-using namespace std;
-
 #define WID_STR "Build a model"
 
 void show_options(char *progname) {
@@ -92,9 +90,9 @@ void scan_options(int n,char **str, Settings *settings) {
 int main (int argc, char *argv[]) {
 	srand((unsigned)time(NULL));
 	TDEModel *tdeModel;
-    Settings settings = { ULONG_MAX, 0, 0xff, 1, 4, 32, 1, 2, 2, NULL, NULL, NULL, 0, 0, 0, 0, 1 };
+    Settings settings = { ULONG_MAX, 0, 0xff, 1, 4, 32, 1, 2, 0, NULL, NULL, NULL, 0, 0, 0, 0, 1 };
     char stin=0;
-    uint i, j;
+    // uint i, j;
 
     if (scan_help(argc,argv))
         show_options(argv[0]);
@@ -122,6 +120,7 @@ int main (int argc, char *argv[]) {
         exit(DELAY_SMALL_ZERO);
     }
 
+    settings.pcaembset = settings.embdim > settings.pcaembdim;
     if (!settings.pcaembset) {
     	settings.pcaembdim = settings.embdim;
     }
@@ -129,12 +128,13 @@ int main (int argc, char *argv[]) {
     tdeModel = new TDEModel(&settings);
     tdeModel->DumpTree(settings.outfile);
 
+    /*
     ANNpoint ap = tdeModel->getDataPoint(0);
     uint N = 1000;
     ANNpointArray pts = annAllocPts(N, settings.embdim);;
     tdeModel->simulateTrajectory(ap, pts, settings.embdim, N);
-
-/*
+     */
+    /*
     uint k = 8;
     ANNidxArray nn_idx;
     ANNdistArray dists;
@@ -146,8 +146,9 @@ int main (int argc, char *argv[]) {
 
     delete [] nn_idx;
     delete [] dists;
-*/
+     */
     // DUMP Manifold and Trajectory
+    /*
     ofstream fout("/tmp/trajectory.csv");
     for (i = 0; i < N; i++) {
     	fout << pts[i][0];
@@ -160,7 +161,7 @@ int main (int argc, char *argv[]) {
     fout.close();
     annDeallocPt(ap);
     delete [] pts;
-
+	*/
     delete tdeModel;
     annClose();
     if (settings.column != NULL) free(settings.column);

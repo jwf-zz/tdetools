@@ -63,7 +63,7 @@ void scan_options(int n,char **str, Settings *settings) {
     if ((out=check_option(str,n,'n','u')) != NULL) {
         sscanf(out,"%u",&settings->neighbours);
     }
-    if ((out=check_option(str,n,'c','u')) != NULL) {
+    if ((out=check_option(str,n,'s','u')) != NULL) {
         sscanf(out,"%u",&settings->seglength);
     }
     if ((out=check_option(str,n,'V','u')) != NULL)

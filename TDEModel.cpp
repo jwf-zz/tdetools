@@ -19,8 +19,6 @@
 #include "BuildTree.h"
 #include "TDEModel.h"
 
-#define NEIGHBOURS 8
-
 using namespace std;
 using namespace boost;
 
@@ -35,6 +33,7 @@ TDEModel::TDEModel(Settings* settings) {
     get_embedding(settings, data, length);
 
     if (use_pca) {
+    	cout << "Computing PCA bases.\n";
     	computePCABases(data, length, embdim, settings->pcaembdim);
     	projecteddata = projectData(data, length, embdim);
     	delete [] data;
@@ -71,11 +70,12 @@ TDEModel::TDEModel(ifstream* model_file) {
 		}
 	}
 	else {
+		use_pca = 0;
 		avg = NULL;
+		bases = NULL;
 	}
 	*model_file >> basesrows >> basescols;
-	if (basesrows > 0 && basescols > 0) {
-		use_pca = 1;
+	if (use_pca) {
 		bases = cvCreateMat(basesrows,basescols,MAT_TYPE);
 		ANNcoord* ptr = (ANNcoord*)bases->data.ptr;
 		for (i = 0; i < basesrows; i++) {
@@ -114,7 +114,7 @@ void TDEModel::DumpTree(char* outfile) {
     }
 	fout << endl;
     if (bases == NULL) {
-    	fout << "0 0";
+    	fout << "0 0" << endl;
     }
     else {
     	fout << bases->rows << " " << bases->cols << endl;
@@ -142,22 +142,22 @@ void TDEModel::simulateTrajectory(ANNpoint s0, ANNpointArray trajectory, uint di
     ANNdistArray dists;
     uint i,j,k;
     variate_generator<mt19937, normal_distribution<> > generator(mt19937(time(0)), normal_distribution<>(0.0,0.1));
-
+    uint neighbours = 4;
 	// +1 in case one of the neighbours is the last point in the model.
-    nn_idx = new ANNidx[NEIGHBOURS+1];
-    dists = new ANNdist[NEIGHBOURS+1];
+    nn_idx = new ANNidx[neighbours+1];
+    dists = new ANNdist[neighbours+1];
 
     for (i = 0; i < dim; i++) {
     	trajectory[0][i] = s0[i];
     }
 
     for (i = 1; i < N; i++) {
-    	getKNN(trajectory[i-1], NEIGHBOURS+1, nn_idx, dists);
+    	getKNN(trajectory[i-1], neighbours+1, nn_idx, dists);
     	for (j = 0; j < dim; j++) {
     		trajectory[i][j] = 0.0;
-    		for (k = 0; k < NEIGHBOURS; k++) {
+    		for (k = 0; k < neighbours; k++) {
     			if (nn_idx[k] == ANN_NULL_IDX) break;
-    			else if (nn_idx[k] == (int)length-1) nn_idx[k] = nn_idx[NEIGHBOURS];
+    			else if (nn_idx[k] == (int)length-1) nn_idx[k] = nn_idx[neighbours];
     			trajectory[i][j] += dataPts[nn_idx[k]+1][j];
     		}
     		trajectory[i][j] = trajectory[i][j] / (ANNcoord)k + generator();
