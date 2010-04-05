@@ -13,7 +13,7 @@
 #include <ANN/ANN.h>
 #include <opencv/cxcore.h>
 #include <boost/random.hpp>
-#include <opencv/cvaux.h>
+//#include <opencv/cvaux.h>
 
 #include "Utils.h"
 #include "BuildTree.h"
