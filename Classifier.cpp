@@ -24,7 +24,7 @@ Classifier::~Classifier() {
 }
 
 void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
-					uint neighbours, uint seglength) {
+		uint neighbours, uint seglength) {
 	// For each set of MATCH_STEPS points, compute the likelihood under each model.
 	TDEModel* model;
 	uint M = models.size();
@@ -92,7 +92,7 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 				/*
                 dist = -sqrt(annDist(pcaembdim, (ANNcoord*) p.data.ptr,
                                 (ANNcoord*) navg[k]->data.ptr));
-				*/
+				 */
 
 				p1 = (ANNcoord*)navg_next[k]->data.ptr;
 				p2 = (ANNcoord*)navg[k]->data.ptr;
@@ -101,39 +101,40 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 					*dst++ = ap[j][l] + (*p1++ - *p2++);
 				}
 
-                                // np is the subsequent point in the trajectory to be classified.
-                                np = cvMat(1, pcaembdim, MAT_TYPE, ap[j + 1]);
+				// np is the subsequent point in the trajectory to be classified.
+				np = cvMat(1, pcaembdim, MAT_TYPE, ap[j + 1]);
 
-                                /*
+				/*
                                   dist_next = -sqrt(annDist(pcaembdim,
                                   (ANNcoord*) np.data.ptr,
                                   (ANNcoord*) proj_next[k]->data.ptr));
-                                */
-                                //mdist = mdist + (dist + dist_next);
-                                
-                                // Shift each vector to the origin and compute the dot product
-                                // normalized by the length of the larger vector.
-                                p1 = (ANNcoord*)p.data.ptr;
-                                p2 = (ANNcoord*)np.data.ptr;
-                                p3 = (ANNcoord*)proj_next[k]->data.ptr;
-                                dist = 0.0;
-                                l1 = 0.0; // Length of first vector
-                                l2 = 0.0; // Length of second vector
-                                for (l = 0; l < pcaembdim; l++) {
-                                    dist = dist + (*p2 - *p1)*(*p3 - *p1);
-                                    l1 = l1 + (*p2 - *p1)*(*p2 - *p1);
-                                    l2 = l2 + (*p3 - *p1)*(*p3 - *p1);
-                                    *p1++; *p2++; *p3++;
-                                }
-                                //l1 = sqrt(l1);
-                                //l2 = sqrt(l2);
-                                mdist = mdist + dist/MAX(l1,l2);
-                        }
+				 */
+				//mdist = mdist + (dist + dist_next);
+
+				// Shift each vector to the origin and compute the dot product
+				// normalized by the length of the larger vector.
+				p1 = (ANNcoord*)p.data.ptr;
+				p2 = (ANNcoord*)np.data.ptr;
+				p3 = (ANNcoord*)proj_next[k]->data.ptr;
+				dist = 0.0;
+				l1 = 0.0; // Length of first vector
+				l2 = 0.0; // Length of second vector
+				for (l = 0; l < pcaembdim; l++) {
+					dist = dist + (*p2 - *p1)*(*p3 - *p1);
+					l1 = l1 + (*p2 - *p1)*(*p2 - *p1);
+					l2 = l2 + (*p3 - *p1)*(*p3 - *p1);
+					*p1++; *p2++; *p3++;
+				}
+				//l1 = sqrt(l1);
+				//l2 = sqrt(l2);
+				mdist = mdist + dist/MAX(l1,l2);
+			}
+			annDeallocPts(ap);
 			// cvmSet(mdists, i, k, mdist);
-                        if (k > 0) cout << " ";
-                        cout << mdist;
+			if (k > 0) cout << " ";
+			cout << mdist;
 		}
-                cout << "\n";
+		cout << "\n";
 	}
 	//print_matrix(mdists);
 	for (i = 0; i < M; i++) {
