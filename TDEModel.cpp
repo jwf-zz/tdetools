@@ -90,6 +90,8 @@ TDEModel::TDEModel(ifstream* model_file) {
 	length = kdTree->nPoints();
 
 	cerr << "Loaded " << length << " points." << endl;
+	model_file->close();
+	delete model_file;
 }
 
 TDEModel::~TDEModel() {
@@ -226,5 +228,6 @@ ANNcoord* TDEModel::projectData(ANNcoord* data, uint rows, uint cols) {
 	}
 	cout << endl;
 	*/
+	delete [] shifteddata;
 	return projecteddata;
 }

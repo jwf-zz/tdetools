@@ -95,19 +95,6 @@ int main (int argc, char *argv[]) {
     settings.infile=search_datafile(argc,argv,NULL,settings.verbosity);
     if (settings.infile == NULL)
         stin=1;
-    if (settings.outfile == NULL) {
-        if (!stin) {
-            check_alloc(settings.outfile=(char*)calloc(strlen(settings.infile)+5,sizeof(char)));
-            strcpy(settings.outfile,settings.infile);
-            strcat(settings.outfile,".dmp");
-        } else {
-            check_alloc(settings.outfile=(char*)calloc(10,sizeof(char)));
-            strcpy(settings.outfile,"stdin.dmp");
-        }
-    }
-    if (!settings.stdo) {
-        test_outfile(settings.outfile);
-    }
 
     if (settings.delay < 1) {
         fprintf(stderr,"Delay has to be larger than 0. Exiting!\n");
@@ -142,7 +129,7 @@ int main (int argc, char *argv[]) {
 
     get_embedding(&settings, data, tlength);
 
-    classifier = new Classifier(models);
+    classifier = new Classifier(&models);
     classifier->go(data, tlength, settings.embdim, settings.neighbours, settings.seglength);
 
     for (uint i = 0; i < models.size(); i++) {
@@ -150,7 +137,8 @@ int main (int argc, char *argv[]) {
     	delete models[i]->model;
     	free(models[i]);
     }
-    delete [] data;
+    free(data);
+    delete classifier;
     annClose();
     if (settings.column != NULL) free(settings.column);
     if (settings.infile != NULL) free(settings.infile);

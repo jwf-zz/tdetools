@@ -46,7 +46,6 @@ void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
     maxemb=0;
     for (i=0;i<alldim;i++)
         maxemb=(maxemb<inddelay[i])?inddelay[i]:maxemb;
-
     if (settings->column == NULL) {
         series=get_multi_series(settings->infile,&settings->length,settings->exclude,&settings->indim,(char*)"",settings->dimset,settings->verbosity);
     } else {
@@ -65,6 +64,12 @@ void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
         }
     }
     length = settings->length - maxemb;
+    for (j = 0; j < settings->indim; j++) {
+    	free(series[j]);
+    }
+    free(series);
+    free(formatlist);
+    free(inddelay);
 }
 
 void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long  rows, unsigned long  cols)

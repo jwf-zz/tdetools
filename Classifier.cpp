@@ -15,19 +15,20 @@
 
 using namespace std;
 
-Classifier::Classifier(vector<NamedModel*> models) {
+Classifier::Classifier(vector<NamedModel*>* models) {
 	this->models = models;
 }
 
 Classifier::~Classifier() {
 	// TODO Auto-generated destructor stub
+	this->models = NULL;
 }
 
 void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 		uint neighbours, uint seglength) {
 	// For each set of MATCH_STEPS points, compute the likelihood under each model.
 	TDEModel* model;
-	uint M = models.size();
+	uint M = models->size();
 	char* model_name;
 	ANNcoord *projected_data;
 	ANNpointArray ap;
@@ -38,14 +39,14 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 	ulong i,j,k,l,a,N,pcaembdim;
 	ANNdist dist, *dst, l1, l2; //, dist_next;
 	ANNcoord *p1, *p2, *p3, *p4;
-	mdists = cvCreateMat(length-seglength-1,models.size(),MAT_TYPE);
+	mdists = cvCreateMat(length-seglength-1,M,MAT_TYPE);
 	cvZero(mdists);
 
 	cerr << "Using " << neighbours << " neighbours with segment length " << seglength << endl;
 
 
 	for (i = 0; i < M; i++) {
-		pcaembdim = models[i]->model->getPCAEmbDim();
+		pcaembdim = (*models)[i]->model->getPCAEmbDim();
 		navg[i] = cvCreateMat(1,pcaembdim,MAT_TYPE);
 		navg_next[i] = cvCreateMat(1,pcaembdim,MAT_TYPE);
 		proj_next[i] = cvCreateMat(1,pcaembdim, MAT_TYPE);
@@ -57,12 +58,13 @@ void Classifier::go(ANNcoord* data, ulong length, ulong embdim,
 		// Get the MATCH_STEPS points
 		// cout << "Step " << i << endl;
 		for (k = 0; k < M; k++) {
-			model = models[k]->model;
-			model_name = models[k]->name;
+			model = (*models)[k]->model;
+			model_name = (*models)[k]->name;
 			N = model->getLength();
 			pcaembdim = model->getPCAEmbDim();
 			projected_data = model->projectData(data+i*embdim,seglength+1,embdim);
 			get_ann_points(ap, projected_data, seglength+1, pcaembdim);
+			delete [] projected_data;
 			mdist = 0.0;
 			for (j = 0; j < seglength; j++) {
 				p = cvMat(1,pcaembdim,MAT_TYPE, ap[j]);

@@ -16,10 +16,10 @@
 class Classifier {
 
 private:
-	std::vector<NamedModel*> models;
+	std::vector<NamedModel*>* models;
 
 public:
-	Classifier(std::vector<NamedModel*> models);
+	Classifier(std::vector<NamedModel*>* models);
 	void go(ANNcoord* data, ulong length, ulong embdim, uint neighbours, uint seglength);
 	virtual ~Classifier();
 };
