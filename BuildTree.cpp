@@ -1,19 +1,12 @@
 //============================================================================
-// Name        : ManifoldExperiment.cpp
-// Author      : 
-// Version     :
-// Copyright   : BSD
+// Name        : BuildTree.cpp
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
 // Description : Constructs a time-delay embedding of the data, equipped with
 //               a model of the dynamics using an approximation of the
 //               one step transition matrix based on averaging the sample
 //               dynamics of the k-nearest neighbours.
 //============================================================================
-/*
- * main.cpp
- *
- *  Created on: Jun 28, 2009
- *      Author: jordan
- */
 
 #include <stdlib.h>
 #include <cstring>
@@ -34,23 +27,21 @@ using namespace std;
 
 void show_options(char *progname) {
     what_i_do(progname, (char*)WID_STR);
-    fprintf(stderr,"\nUsage: %s [options]\n",progname);
+    fprintf(stderr,"\nUsage: %s [options] [datafile]\n",progname);
     fprintf(stderr,"Options:\n");
-    fprintf(stderr,"Everything not being a valid option will be interpreted as a"
-            " possible datafile.\nIf no datafile is given stdin is read."
+    fprintf(stderr,"If no datafile is given stdin is read."
             " Just - also means stdin\n");
     fprintf(stderr,"\t-l # of data [default: whole file]\n");
     fprintf(stderr,"\t-x # of rows to ignore [default: 0]\n");
-    fprintf(stderr,"\t-M num. of columns to read [default: 1]\n");
-    fprintf(stderr,"\t-c columns to read [default: 1,...,M]\n");
+    fprintf(stderr,"\t-M num. of columns to read [default: 1 (1 is the only value supported currently)]\n");
+    fprintf(stderr,"\t-c columns to read [default: 1]\n");
     fprintf(stderr,"\t-m dimension [default: 2]\n");
     fprintf(stderr,"\t-p # dimension to reduce to using PCA [default: same as m, ie. no reduction]\n");
     fprintf(stderr,"\t-d delay [default: 1]\n");
     fprintf(stderr,"\t-V verbosity level [default: 1]\n\t\t"
             "0='only panic messages'\n\t\t"
             "1='+ input/output messages'\n");
-    fprintf(stderr,"\t-o output file [default: 'datafile'.del, "
-            "without -o: stdout]\n");
+    fprintf(stderr,"\t-o output file [default: datafile.dmp]\n");
     fprintf(stderr,"\t-h show these options\n");
     exit(0);
 }

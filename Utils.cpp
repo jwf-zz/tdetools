@@ -1,9 +1,9 @@
-/*
- * Utils.cpp
- *
- *  Created on: 2009-06-30
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : Utils.cpp
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+// Description : Some helpful utility methods.
+//============================================================================
 
 #include <stdlib.h>
 #include <cstring>

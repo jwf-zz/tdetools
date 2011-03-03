@@ -1,9 +1,9 @@
-/*
- * TDEModel.cpp
- *
- *  Created on: 2009-06-29
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : TDEModel.cpp
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+// Description : Implementation for the time-delay embedding model.
+//============================================================================
 
 #include <stdlib.h>
 #include <ctype.h>

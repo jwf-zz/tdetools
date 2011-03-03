@@ -1,9 +1,10 @@
-/*
- * Classifier.cpp
- *
- *  Created on: 2009-06-30
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : Classifier.cpp
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+// Description : Implements the Geometric Template Matching algorithm for 
+//               time-series classification.
+//============================================================================
 
 #include <stdlib.h>
 #include <vector>

@@ -1,9 +1,8 @@
-/*
- * Classifier.h
- *
- *  Created on: 2009-06-30
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : Classifier.h
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+//============================================================================
 
 #include <stdlib.h>
 #include "ClassifyTrajectory.h"

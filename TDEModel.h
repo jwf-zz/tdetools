@@ -1,9 +1,8 @@
-/*
- * TDEModel.h
- *
- *  Created on: 2009-06-29
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : TDEModel.h
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+//============================================================================
 
 #include <opencv/cxcore.h>
 #include "Utils.h"

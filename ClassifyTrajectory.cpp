@@ -1,9 +1,9 @@
-/*
- * ClassifyTrajectory.cpp
- *
- *  Created on: 2009-06-30
- *      Author: jfrank8
- */
+//============================================================================
+// Name        : ClassifyTrajectory.cpp
+// Author      : Jordan Frank (jordan.frank@cs.mcgill.ca)
+// Copyright   : MIT
+// Description : Application for running the GTM classifier on a data set.
+//============================================================================
 
 #include <stdlib.h>
 #include <cstring>
@@ -28,23 +28,20 @@ using namespace std;
 
 void show_options(char *progname) {
     what_i_do(progname, (char*)WID_STR);
-    fprintf(stderr,"\nUsage: %s [options]\n",progname);
+    fprintf(stderr,"\nUsage: %s [options] [datafile]\n",progname);
     fprintf(stderr,"Options:\n");
-    fprintf(stderr,"Everything not being a valid option will be interpreted as a"
-            " possible datafile.\nIf no datafile is given stdin is read."
+    fprintf(stderr,"If no datafile is given stdin is read."
             " Just - also means stdin\n");
     fprintf(stderr,"\t-l # of data [default: whole file]\n");
     fprintf(stderr,"\t-x # of rows to ignore [default: 0]\n");
     fprintf(stderr,"\t-M num. of columns to read [default: 1]\n");
-    fprintf(stderr,"\t-c columns to read [default: 1,...,M]\n");
+    fprintf(stderr,"\t-c columns to read [default: 1]\n");
     fprintf(stderr,"\t-n number of neighbours to match [default: 4]\n");
     fprintf(stderr,"\t-s length of matched segments [default: 32]\n");
-    fprintf(stderr,"\t-A # of algorithm to use (1: old, 2: new, 3: fancy new) [default: old algorithm (1)]\n");
+    fprintf(stderr,"\t-A # of algorithm to use (1: old, 2: new (unpublished), 3: fancy new (still buggy)) [default: old algorithm (1)]\n");
     fprintf(stderr,"\t-V verbosity level [default: 0]\n\t\t"
             "0='only panic messages'\n\t\t"
             "1='+ input/output messages'\n");
-    fprintf(stderr,"\t-o output file [default: 'datafile'.del, "
-            "without -o: stdout]\n");
     fprintf(stderr,"\t-h show these options\n");
     exit(0);
 }
@@ -70,11 +67,6 @@ void scan_options(int n,char **str, Settings *settings) {
     }
     if ((out=check_option(str,n,'V','u')) != NULL)
         sscanf(out,"%u",&settings->verbosity);
-    if ((out=check_option(str,n,'o','o')) != NULL) {
-        settings->stdo=0;
-        if (strlen(out) > 0)
-            settings->outfile=out;
-    }
 }
 
 int main (int argc, char *argv[]) {
