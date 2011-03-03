@@ -20,8 +20,9 @@ private:
 
 public:
 	Classifier(std::vector<NamedModel*>* models);
-	void go(ANNcoord* data, ulong length, ulong embdim, uint neighbours, uint seglength);
+	void go(ANNcoord* data, uint length, uint embdim, uint neighbours, uint seglength, uint algorithm, uint verbosity);
 	virtual ~Classifier();
 };
 
+inline float get_interpolation_coefficient(ANNpoint p, ANNpoint p1, ANNpoint p2, uint dim);
 #endif /* CLASSIFIER_H_ */

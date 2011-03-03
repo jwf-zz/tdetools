@@ -33,7 +33,7 @@ TDEModel::TDEModel(Settings* settings) {
     get_embedding(settings, data, length);
 
     if (use_pca) {
-    	cout << "Computing PCA bases.\n";
+    	cerr << "Computing PCA bases.\n";
     	computePCABases(data, length, embdim, settings->pcaembdim);
     	projecteddata = projectData(data, length, embdim);
     	delete [] data;
@@ -55,12 +55,12 @@ TDEModel::TDEModel(Settings* settings) {
     delete [] data;
 }
 
-TDEModel::TDEModel(ifstream* model_file) {
+TDEModel::TDEModel(ifstream* model_file, uint verbosity) {
 	int avgsize, basesrows, basescols, i, j;
 	*model_file >> delay;
 	*model_file >> embdim;
 	*model_file >> avgsize;
-	cerr << "Model params: " << delay << " " << " " << embdim << " " << avgsize << endl;
+
 	if (avgsize > 0) {
 		use_pca = 1;
 		avg = cvCreateMat(1,avgsize,MAT_TYPE);
@@ -75,6 +75,12 @@ TDEModel::TDEModel(ifstream* model_file) {
 		bases = NULL;
 	}
 	*model_file >> basesrows >> basescols;
+	if (verbosity > 0) {
+		if (basescols > 0)
+			cerr << "Model params: d=" << delay << " m=" << " " << embdim << " p=" << basescols << endl;
+		else
+			cerr << "Model params: d=" << delay << " m=" << " " << embdim << endl;
+	}
 	if (use_pca) {
 		bases = cvCreateMat(basesrows,basescols,MAT_TYPE);
 		ANNcoord* ptr = (ANNcoord*)bases->data.ptr;
@@ -89,7 +95,8 @@ TDEModel::TDEModel(ifstream* model_file) {
 	dataPts = kdTree->thePoints();
 	length = kdTree->nPoints();
 
-	cerr << "Loaded " << length << " points." << endl;
+	if (verbosity > 0)
+		cerr << "Loaded " << length << " points." << endl;
 	model_file->close();
 	delete model_file;
 }
@@ -97,8 +104,8 @@ TDEModel::TDEModel(ifstream* model_file) {
 TDEModel::~TDEModel() {
 	if (avg != NULL) cvReleaseMat(&avg);
 	if (bases != NULL) cvReleaseMat(&bases);
+	annDeallocPts(dataPts);
 	delete kdTree;
-	delete [] dataPts;
 }
 
 void TDEModel::DumpTree(char* outfile) {

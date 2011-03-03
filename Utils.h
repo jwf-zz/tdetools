@@ -20,8 +20,8 @@
 #define UTILS_H_
 
 typedef struct {
-	ulong length;
-	ulong exclude;
+	unsigned long length;
+	unsigned long exclude;
 	uint verbosity;
 	int delay;
 	uint neighbours;
@@ -37,10 +37,11 @@ typedef struct {
 	char pcaembset;
 	char delayset;
 	char stdo;
+	uint algorithm;
 } Settings;
 
-void get_embedding(Settings* settings, ANNcoord*& data, ulong &length);
-void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, ulong rows, ulong cols);
+void get_embedding(Settings* settings, ANNcoord*& data, unsigned long &length);
+void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long rows, uint cols);
 void print_matrix(CvMat* matrix);
 
 #define MAT_TYPE CV_32FC1

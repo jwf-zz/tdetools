@@ -39,8 +39,8 @@ void show_options(char *progname) {
     fprintf(stderr,"\t-c columns to read [default: 1,...,M]\n");
     fprintf(stderr,"\t-n number of neighbours to match [default: 4]\n");
     fprintf(stderr,"\t-s length of matched segments [default: 32]\n");
-
-    fprintf(stderr,"\t-V verbosity level [default: 1]\n\t\t"
+    fprintf(stderr,"\t-A # of algorithm to use (1: old, 2: new, 3: fancy new) [default: old algorithm (1)]\n");
+    fprintf(stderr,"\t-V verbosity level [default: 0]\n\t\t"
             "0='only panic messages'\n\t\t"
             "1='+ input/output messages'\n");
     fprintf(stderr,"\t-o output file [default: 'datafile'.del, "
@@ -50,6 +50,8 @@ void show_options(char *progname) {
 }
 void scan_options(int n,char **str, Settings *settings) {
     char *out;
+    if ((out=check_option(str,n,'A','u')) != NULL)
+        sscanf(out,"%u",&settings->algorithm);
     if ((out=check_option(str,n,'l','u')) != NULL)
         sscanf(out,"%lu",&settings->length);
     if ((out=check_option(str,n,'x','u')) != NULL)
@@ -79,9 +81,9 @@ int main (int argc, char *argv[]) {
 	vector<NamedModel*> models;
 	NamedModel *model;
 	Classifier *classifier;
-    Settings settings = { ULONG_MAX, 0, 0xff, 1, 4, 32, 1, 2, NULL, NULL, NULL, 0, 0, 0, 1 };
+	Settings settings = { ULONG_MAX, 0, 0, 3, 4, 32, 1, 5, 5, NULL, NULL, NULL, 0, 0, 0, 0, 1, 1 };
     ANNcoord* data;
-    ulong tlength;
+    unsigned long tlength;
     char stin=0;
     char *model_ini = (char*)"models.ini";
     ifstream models_file;
@@ -100,6 +102,10 @@ int main (int argc, char *argv[]) {
         fprintf(stderr,"Delay has to be larger than 0. Exiting!\n");
         exit(DELAY_SMALL_ZERO);
     }
+    if (settings.algorithm < 1 || settings.algorithm > 3) {
+    	fprintf(stderr, "Invalid algorithm: Value must be 1, 2, or 3.\n");
+    	exit(1);
+    }
 
     // Read the models.ini file.
     models_file.open(model_ini);
@@ -109,8 +115,9 @@ int main (int argc, char *argv[]) {
     		check_alloc(model=(NamedModel*)calloc(1,sizeof(NamedModel)));
     		check_alloc(model->name=(char*)calloc(strlen(buf)+1,sizeof(char)));
     		strcpy(model->name,buf);
-    		cerr << "Reading from model" << model->name << endl;
-    		model->model = new TDEModel(new ifstream(model->name));
+    		if (settings.verbosity > 0)
+    			cerr << "Reading from model: " << model->name << endl;
+    		model->model = new TDEModel(new ifstream(model->name), settings.verbosity);
     		models.push_back(model);
     	}
     }
@@ -129,8 +136,9 @@ int main (int argc, char *argv[]) {
 
     get_embedding(&settings, data, tlength);
 
+    cerr << "Classifying..." << endl;
     classifier = new Classifier(&models);
-    classifier->go(data, tlength, settings.embdim, settings.neighbours, settings.seglength);
+    classifier->go(data, tlength, settings.embdim, settings.neighbours, settings.seglength, settings.algorithm, settings.verbosity);
 
     for (uint i = 0; i < models.size(); i++) {
     	free(models[i]->name);

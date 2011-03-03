@@ -14,7 +14,7 @@
 class TDEModel {
 public:
 	TDEModel(Settings* settings);
-	TDEModel(std::ifstream* model_file);
+	TDEModel(std::ifstream* model_file, uint verbosity);
 	virtual ~TDEModel();
 
 	void DumpTree(char* outfile);
@@ -40,7 +40,7 @@ private:
     ANNpointArray dataPts;
     ANNkd_tree *kdTree;
     // Related to the PCA
-    void computePCABases(ANNcoord *data, unsigned int rows, unsigned int cols, unsigned int numbases);
+    void computePCABases(ANNcoord *data, uint rows, uint cols, uint numbases);
     char use_pca;
     CvMat* avg;
     CvMat* bases;

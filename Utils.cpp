@@ -17,12 +17,12 @@
 
 using namespace std;
 
-void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
-    ulong i;
-    uint j,k;
-    uint alldim, maxemb, emb, rundel, delsum;
-    uint *inddelay;
-    uint *formatlist;
+void get_embedding(Settings* settings, ANNcoord* &data, unsigned long &length) {
+	uint i;
+	uint j,k;
+	uint alldim, maxemb, emb, rundel, delsum;
+	uint *inddelay;
+	uint *formatlist;
 	double** series;
 
     check_alloc(formatlist=(uint*)malloc(sizeof(int)*settings->indim));
@@ -51,7 +51,9 @@ void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
     } else {
         series=get_multi_series(settings->infile,&settings->length,settings->exclude,&settings->indim,settings->column,settings->dimset,settings->verbosity);
     }
-    cerr << "Length: " << settings->length << endl << "Embed Dim: " << settings->embdim << endl;
+    if (settings->verbosity > 0) {
+    	cerr << "Length: " << settings->length << endl << "Embed Dim: " << settings->embdim << endl;
+    }
 
     check_alloc(data = (ANNcoord*)calloc((settings->length-maxemb)*settings->embdim,sizeof(ANNcoord)));
     uint step = settings->embdim;
@@ -72,9 +74,9 @@ void get_embedding(Settings* settings, ANNcoord* &data, ulong &length) {
     free(inddelay);
 }
 
-void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long  rows, unsigned long  cols)
+void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long  rows, uint cols)
 {
-	ulong k = 0;
+	unsigned long k = 0;
     dataPts = annAllocPts(rows, cols);
     for (ulong i = 0; i < rows; i++) {
         for (ulong j = 0; j < cols; j++) {
