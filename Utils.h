@@ -44,7 +44,7 @@ void get_embedding(Settings* settings, ANNcoord*& data, unsigned long &length);
 void get_ann_points(ANNpointArray &dataPts, ANNcoord* series, unsigned long rows, uint cols);
 void print_matrix(CvMat* matrix);
 
-#define MAT_TYPE CV_64FC1
+#define MAT_TYPE (sizeof(ANNcoord)==sizeof(float)) ? CV_32FC1 : CV_64FC1
 #define FLOAT_SCAN "%G"
 #define FLOAT_OUT "%.8G"
 
