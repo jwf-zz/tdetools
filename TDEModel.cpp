@@ -77,9 +77,9 @@ TDEModel::TDEModel(ifstream* model_file, uint verbosity) {
 	*model_file >> basesrows >> basescols;
 	if (verbosity > 0) {
 		if (basescols > 0)
-			cerr << "Model params: d=" << delay << " m=" << " " << embdim << " p=" << basescols << endl;
+			cerr << "Model params: d=" << delay << " m=" << embdim << " p=" << basescols << endl;
 		else
-			cerr << "Model params: d=" << delay << " m=" << " " << embdim << endl;
+			cerr << "Model params: d=" << delay << " m=" << embdim << endl;
 	}
 	if (use_pca) {
 		bases = cvCreateMat(basesrows,basescols,MAT_TYPE);
