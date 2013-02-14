@@ -4,7 +4,7 @@
 // Copyright   : MIT
 //============================================================================
 
-#include <opencv/cxcore.h>
+#include <opencv2/core/core.hpp>
 #include "Utils.h"
 
 #ifndef TDEMODEL_H_

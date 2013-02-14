@@ -12,7 +12,7 @@
 
 #include <ANN/ANN.h>
 #include <Tisean/tsa.h>
-#include <opencv/cxcore.h>
+#include <opencv2/opencv.hpp>
 #include "Utils.h"
 
 using namespace std;

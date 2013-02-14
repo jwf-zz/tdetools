@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <ANN/ANN.h>
-#include <opencv/cxcore.h>
+#include <opencv2/opencv.hpp>
 
 #ifndef ulong
 #define ulong unsigned long
