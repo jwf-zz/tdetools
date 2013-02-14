@@ -1,0 +1,24 @@
+The code contained in this directory is copied from the Tisean 3.0.1 project.
+
+More specifically, it consists of the Tisean_3.0.1/source_c/routines/ directory. 
+_______________________________________________________________________________
+
+        _/_/_/_/_/  _/     _/_/_/     _/_/_/_/     _/_/     _/      _/ 
+           _/      _/   _/      _/   _/         _/    _/   _/      _/  
+          _/      _/   _/           _/         _/    _/   _/_/    _/   
+         _/      _/     _/_/_/     _/_/_/_/   _/_/_/_/   _/  _/  _/    
+        _/      _/           _/   _/         _/    _/   _/    _/_/     
+       _/      _/   _/      _/   _/         _/    _/   _/      _/      
+      _/      _/     _/_/_/     _/_/_/_/   _/    _/   _/      _/       
+     
+     Nonlinear time series project
+     Copyright (C) Rainer Hegger & Thomas Schreiber (1998-2007) 
+_______________________________________________________________________________
+
+All programs are given WITHOUT ANY WARRANTY; without even the implied 
+warranty of merchantability or fitness for a particular purpose. If you decide
+to use them, you do so AT YOUR OWN RISK.
+
+The copyright to each program is held by the person named in the source code.
+You may use and refer to them as you do with any scientific publication.
+_______________________________________________________________________________
