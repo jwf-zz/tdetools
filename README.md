@@ -8,7 +8,7 @@ This project contains proof-of-concept tools for time-series classification usin
 System Dependencies
 ===================
 
-1. `sudo apt-get install cmake libopencv-dev libann`
+1. `sudo apt-get install cmake libopencv-dev libann-dev libboost-dev`
 
 This project depends on the nonlinear time series analysis toolbox [Tisean
 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/)
