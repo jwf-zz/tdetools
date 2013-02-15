@@ -11,7 +11,7 @@
 #include <fstream>
 #include <Tisean/tsa.h>
 #include <ANN/ANN.h>
-#include <opencv/cxcore.h>
+#include <opencv2/opencv.hpp>
 #include <boost/random.hpp>
 //#include <opencv/cvaux.h>
 
